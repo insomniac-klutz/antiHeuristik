@@ -69,3 +69,10 @@ An entry may go through multiple architect/critic rounds before a verdict. Each 
 - `phase` tracks where in the build lifecycle this happened
 - `verdict` is the final call — architect always has last word
 - `next` ties the entry to forward motion
+
+## Build Workflow
+
+- **Do not write code until the architect explicitly asks to build.** During discovery and design, keep the conversation going — critique, improve, ask hard questions, turn by turn.
+- When the architect says "build", log the decision in musings first, then build together. Don't assume — let the architect guide, but pushback if something is wrong or could be done better.
+- **Always include a theory tip** in every critic turn — a relevant concept, paper insight, or engineering principle that connects to what's being discussed. Make it practical, not academic.
+- **When the architect says "build"**, collect all theory tips generated during the conversation and write them into the build's `theory/` directory, grouped by topic category (e.g., `theory/context-windows.md`, `theory/retrieval-patterns.md`). Do this before or alongside the build step — the theory dir should reflect everything discussed, not just what made it into code. Before creating a new file, check if an existing theory doc already covers that category — append to it if so, only create a new doc if the topic genuinely doesn't fit anywhere existing.
