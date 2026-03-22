@@ -1,3 +1,3 @@
-# Musings — Long-Conversation Agent
+# Musings — Video Incident Analyzer
 
 <!-- architect: synergyStud | critic: claude -->

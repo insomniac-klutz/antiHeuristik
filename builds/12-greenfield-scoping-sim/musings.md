@@ -1,3 +1,3 @@
-# Musings — Long-Conversation Agent
+# Musings — Greenfield AI Scoping Simulator
 
 <!-- architect: synergyStud | critic: claude -->

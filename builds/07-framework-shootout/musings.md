@@ -1,3 +1,3 @@
-# Musings — Long-Conversation Agent
+# Musings — Framework Shootout
 
 <!-- architect: synergyStud | critic: claude -->

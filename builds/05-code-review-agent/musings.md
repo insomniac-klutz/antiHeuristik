@@ -1,3 +1,3 @@
-# Musings — Long-Conversation Agent
+# Musings — Code Review Agent
 
 <!-- architect: synergyStud | critic: claude -->

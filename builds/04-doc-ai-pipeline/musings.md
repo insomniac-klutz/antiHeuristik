@@ -1,3 +1,3 @@
-# Musings — Long-Conversation Agent
+# Musings — Document AI Pipeline
 
 <!-- architect: synergyStud | critic: claude -->
