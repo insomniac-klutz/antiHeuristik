@@ -40,12 +40,14 @@ Summarize to the user:
 **Heading-level dedup check first**:
 
 1. Read `grind/theo/theo-log.md` (root log). For the target build's section, collect the **exact headings and subheadings** already integrated per source file, along with the integration date.
-2. For each source file that has any prior integration entries, check git history for changes since last integration:
+2. For each source file that has any prior integration entries, check for changes since last integration using **both** committed history and working tree state:
    ```
    git log --after="<last-integration-date>" -- builds/<target>/theory/<source-file>.md
+   git diff -- builds/<target>/theory/<source-file>.md
    ```
-   - **File changed after last integration** → mark as `re-examine`. All headings must be re-read — content under previously integrated headings may have been updated. Flag these to the user with `(changed since last integration)`.
-   - **File unchanged since last integration** → skip headings already in the log. Only process genuinely new headings that weren't in the log.
+   A file is changed if **either** check shows changes — commits after the integration date OR uncommitted working tree modifications. `git log` alone misses unstaged edits.
+   - **File changed** (commits OR working tree diff) → mark as `re-examine`. All headings must be re-read — content under previously integrated headings may have been updated. Flag these to the user with `(changed since last integration)`.
+   - **File unchanged** (no commits AND no working tree diff) → skip headings already in the log. Only process genuinely new headings that weren't in the log.
 3. Source files with zero prior integration entries are fully new — process everything.
 
 Then read each `.md` file in `builds/<target>/theory/` that has work to do (new files + files with new or changed headings).
@@ -187,11 +189,36 @@ For each directory touched, append an entry mapping source → target files **wi
 
 The root log is the primary dedup source (Step 2 checks it for heading-level history + git timestamps). Sub-dir logs serve as a secondary cross-check and directory-scoped view of what landed where.
 
-### Step 7 — Summary
+### Step 7 — Rebuild & Validate Book
+
+Run the book pipeline and validate the output:
+
+1. **Rebuild**: `uv run python meta/anti-bk/anti-bk-writer.py`
+2. **Validate**: Read the generated `meta/anti-bk/assets/anti-bk.md` and cross-check against the source `.md` files in `grind/theo/`:
+   - Every content file's H2/H3/H4 headings must appear in the book (heading completeness)
+   - No heading text should be truncated, mangled, or duplicated
+   - Chapter names in the TOC must match `DISPLAY_NAMES` in the writer (if a new directory was created, add it to the map)
+   - Section descriptions must match the subdir `theo-index.md` descriptions
+3. **Pattern scan** (optional): `uv run python meta/anti-bk/anti-bk-pattern.py` — check if newly added content introduces markdown patterns not yet captured by the pattern registry. If new patterns are found, update `anti-bk-pattern.py`'s `PATTERNS` tuple.
+4. **Fix forward**: If validation finds issues:
+   - Missing content → check `IGNORE_STEMS` in the writer, check `_is_content_file` logic
+   - Broken rendering → check `_bump_headings` offset, check HTML passthrough in markdown-it
+   - New directory not appearing → add entry to `DISPLAY_NAMES` in the writer
+   - New markdown patterns not rendered → update `PATTERNS` in `anti-bk-pattern.py`
+
+Report the book status to the user:
+```
+book: ✓ rebuilt (N chapters, N sections, N headings)
+validation: ✓ all source headings present | ✗ missing: [list]
+patterns: ✓ all captured | ✗ new patterns found: [list]
+```
+
+### Step 8 — Summary
 
 Present a final summary to the user:
 - Files created/modified
 - Sections added
+- Book rebuild status
 - Suggestions for follow-up (e.g., "the quantization content could also inform a future grind/theo/deploy/ entry on serving optimization")
 - Recommend running `/anti-theo-xref` if content spans multiple directories
 - Recommend running `/anti-theo-split` if any target file grew large

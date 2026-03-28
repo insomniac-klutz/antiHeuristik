@@ -16,7 +16,13 @@ Run this after `/anti-theo-conso` or periodically to keep the book navigable.
 
 ### Step 1 — Measure
 
-For each `.md` content file (not indexes or logs) in `grind/theo/`:
+First, check for uncommitted changes to content files — these may be from a recent `/anti-theo-conso` run that hasn't been committed yet:
+```
+git diff -- grind/theo/
+```
+Flag any files with working tree modifications so the user knows the analysis reflects uncommitted state.
+
+Then, for each `.md` content file (not indexes or logs) in `grind/theo/`:
 - Count lines
 - Count H2 sections
 - Count H3 sections
@@ -81,13 +87,32 @@ Append a split entry to both root and sub-dir `theo-log.md`:
   - H2 heading kept
 ```
 
-### Step 6 — Summary
+### Step 6 — Rebuild & Validate Book
+
+Run the book pipeline and validate the output:
+
+1. **Rebuild**: `uv run python meta/anti-bk/anti-bk-writer.py`
+2. **Validate**: Read `meta/anti-bk/assets/anti-bk.md` and verify:
+   - Split files appear as separate sections in the book
+   - No content was lost — every heading from the original file appears in one of the new files
+   - TOC reflects the new file structure
+   - If a new directory was created, add it to `DISPLAY_NAMES` in the writer
+3. **Fix forward**: If the book is missing content or has rendering issues, fix the writer/pattern files as needed.
+
+Report book status:
+```
+book: ✓ rebuilt (N chapters, N sections, N headings)
+validation: ✓ all split content present | ✗ missing: [list]
+```
+
+### Step 7 — Summary
 
 Present:
 - Files created by split
 - Files modified
 - Sections moved
 - Cross-references added (if any)
+- Book rebuild status
 
 ---
 
