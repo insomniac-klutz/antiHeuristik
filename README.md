@@ -1,6 +1,12 @@
 # antiHeuristik
 
+***pathei mathos ara prōtai archai*** — learn through suffering, then find first principles
+
+`cargo cult engineering  ×  return to monke`
+
 theory, minus the parts that exist to justify someone's thesis -- learn what to do with it. then ask why and how. that's antiHeuristik.
+
+**[skip the vibes, read the book →](meta/anti-bk.pdf)**
 
 12 applied AI builds. each one compresses months of on-the-job learning into days. no toy demos. no tutorial hell. you build the thing, hit the wall, learn only what unblocks you, and build again.
 
