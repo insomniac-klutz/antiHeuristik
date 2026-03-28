@@ -19,8 +19,8 @@ Build a system that ingests video (meeting recordings or security footage), samp
 - Embedding heterogeneous content — text chunks + image descriptions into a unified search space
 - Long-context management — a 15-min video generates a LOT of context
 
-## Interview Translation
-"How would you build [video analysis / meeting intelligence / visual monitoring]?" — multimodal AI is the 2026 frontier. Most candidates have only worked with text. You'll have built across modalities.
+## The Real Lesson
+Most AI work is text-only. Video forces you to think across modalities — vision, audio, time. The fusion problem alone teaches more about representation and context management than any text-only project.
 
 ## Stretch
 - Real-time processing (analyze a live stream, not just recordings)

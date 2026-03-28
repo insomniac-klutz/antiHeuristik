@@ -20,8 +20,8 @@ Take a tabular prediction problem (churn, fraud, lead scoring — pick one with 
 - CSV/Parquet format tradeoffs — chunked reading for large datasets
 - Cost modeling — LLM cost per prediction vs classical ML cost (essentially free)
 
-## Interview Translation
-"Should we use an LLM for this?" — the mature answer isn't always yes. This build gives you the numbers and the framework to know when classical ML wins. Series B-D companies love engineers who don't reach for the most expensive hammer by default.
+## The Real Lesson
+The instinct to throw an LLM at everything is expensive and often wrong. This build gives you the numbers and discipline to know when classical ML wins — the kind of judgement that normally takes years of shipping the wrong solution first.
 
 ## Stretch
 - Add a polars implementation alongside pandas and benchmark data processing speed

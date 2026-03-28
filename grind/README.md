@@ -1,6 +1,6 @@
 # Grind — Topic Seed Bank
 
-This is every topic extracted from the original prep plan, organized by domain.
+Every topic extracted from the builds, organized by domain.
 Two purposes:
 
 1. **When a Build hits a wall**, find the relevant topic here, drill it, move on.

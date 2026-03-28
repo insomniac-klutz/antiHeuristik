@@ -30,8 +30,8 @@ Build a reusable evaluation system for this build's MVP. Not a toy — something
   - Doc AI → extraction accuracy, field-level F1, confidence calibration
 - CI integration for LLM quality gates
 
-## Interview Translation
-"How do you know your LLM system is working?" — asked in every serious interview. Most candidates mumble about BLEU scores. You'll whiteboard an eval architecture specific to the system type.
+## The Real Lesson
+"How do you know your LLM system is working?" — the question most people can't answer concretely. After this layer, you can design an eval architecture specific to any system type, not just cite BLEU scores from a textbook.
 
 ## Stretch
 - A/B testing framework for prompt variants

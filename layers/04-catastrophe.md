@@ -46,8 +46,8 @@ Inject 5+ realistic failure modes into this build. Debug them live, under time p
 - Monitoring additions: what alerts would have caught this before a user did
 - Architecture changes: what you'd change in the system design to be resilient
 
-## Interview Translation
-"What could go wrong?" and "Tell me about a production incident" — this layer gives you a catalog of failure modes AND the debugging story for each, specific to the system type.
+## The Real Lesson
+You don't truly understand a system until you've broken it. This layer gives you a catalog of failure modes and the debugging instincts for each — the kind of knowledge that normally takes a year of on-call to build.
 
 ## Stretch
 - Build a chaos engineering harness for LLM systems

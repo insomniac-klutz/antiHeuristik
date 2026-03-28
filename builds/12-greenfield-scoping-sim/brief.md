@@ -44,8 +44,8 @@ This is not a codebase — it's a structured decision exercise. Take 5 real-worl
 - Cost modeling from scratch — not optimizing an existing system, estimating a new one
 - Stakeholder communication — explaining technical decisions to non-technical people
 
-## Interview Translation
-"How would you add AI to our product?" — the most common open-ended question at Series B-D startups. This exercise trains the muscle for that exact conversation.
+## The Real Lesson
+The hardest skill in applied AI isn't building — it's deciding what to build. Saying "don't use AI" when AI isn't the answer is a muscle you only develop by working through ambiguous, real-world asks.
 
 ## The Build Phase
 Pick the one scenario where AI genuinely makes sense. Build it. Apply all 4 layers. This is where the exercise becomes antiHeuristic — the scoping forces strategic thinking, then you build the thing you scoped.

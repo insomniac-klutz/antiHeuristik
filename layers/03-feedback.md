@@ -24,8 +24,8 @@ Add a feedback loop that makes this build's system improve over time from user i
 - Continuous eval (measuring improvement over time, not just point-in-time)
 - Data flywheel economics (when more data helps vs when it doesn't)
 
-## Interview Translation
-"How would you make this system better over time?" — the question that separates "I shipped v1" from "I own the system." This layer is that answer.
+## The Real Lesson
+Shipping v1 is table stakes. Owning a system means making it improve over time from real usage. This layer is the difference between "I built it" and "I made it learn."
 
 ## Stretch
 - Implement a preference model that learns from feedback

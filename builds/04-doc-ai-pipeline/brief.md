@@ -19,8 +19,8 @@ Build a pipeline that ingests messy documents (PDFs, scanned images, mixed-forma
 - Error handling at scale (what do you do with 5% of docs that fail?)
 - Quality metrics for extraction accuracy
 
-## Interview Translation
-"How would you build document processing for [insurance/legal/finance]?" — every vertical AI company needs this. Multimodal is the 2026 differentiator.
+## The Real Lesson
+Every company has messy documents. The hard part isn't the happy path — it's the 5% that fail and the pipeline that has to keep running. Multimodal processing + error handling at scale is where the real understanding develops.
 
 ## Stretch
 - Add a human review queue for low-confidence extractions

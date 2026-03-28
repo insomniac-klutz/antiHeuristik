@@ -24,8 +24,8 @@ Build an API gateway that sits in front of multiple LLM providers (OpenAI, Anthr
 - Logging sanitization — the gap between "log everything for debugging" and "don't store PII"
 - Provider failover and health checking
 
-## Interview Translation
-"How would you handle data privacy in your AI system?" and "How do you manage multiple LLM providers?" — compliance is what enterprise buyers ask about. This build is the answer B2B companies want to hear.
+## The Real Lesson
+Production AI systems don't live in a vacuum — they have users, regulations, and data that can't leave certain boundaries. This is the infrastructure layer most people ignore until legal comes knocking. Building it teaches you to think about compliance as architecture, not afterthought.
 
 ## Stretch
 - Add request-level cost budgets ("this user's requests cannot exceed $X/day")

@@ -20,8 +20,8 @@ Build an agentic support bot that serves multiple tenants (companies), each with
 - Multi-agent vs single-agent tradeoffs
 - Human-in-the-loop escalation design
 
-## Interview Translation
-"How would you build an AI assistant for our platform?" — every B2B SaaS company asks this. Tenant isolation is the detail that separates senior from junior answers.
+## The Real Lesson
+Every real agent system serves multiple customers with different data. Tenant isolation, guardrails, and escalation design are the skills you only develop by building a system that has to enforce boundaries — not just hope for them.
 
 ## Stretch
 - Add a red-team mode that tries to break tenant isolation

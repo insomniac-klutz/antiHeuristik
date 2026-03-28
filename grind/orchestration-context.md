@@ -8,7 +8,7 @@ Gaps identified in audit — no build directly covered these.
 - [ ] LlamaIndex — data framework, index types, when it beats LangChain
 - [ ] CrewAI / AutoGen — multi-agent frameworks, tradeoffs
 - [ ] Roll your own — when frameworks hurt, minimal orchestration patterns
-- [ ] "Why did you / didn't you use LangChain?" — the interview answer
+- [ ] "Why did you / didn't you use LangChain?" — knowing the real tradeoffs
 
 ## Context Window Management
 - [ ] Context packing — fitting maximum useful info in limited tokens

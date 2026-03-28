@@ -18,8 +18,8 @@ Build a RAG system that takes a patent abstract and finds related prior art from
 - Citation/grounding — not just retrieval but *showing your work*
 - Multi-hop retrieval (one patent references another)
 
-## Interview Translation
-"Design a RAG system for [domain]" — this is the most common system design question in Applied AI interviews. This build IS the prep.
+## The Real Lesson
+RAG is the backbone of most production AI systems. This build compresses 6 months of retrieval engineering into one focused sprint — chunking, reranking, hybrid search, all learned by hitting walls.
 
 ## Stretch
 - Add metadata filtering (by date, classification code, inventor)

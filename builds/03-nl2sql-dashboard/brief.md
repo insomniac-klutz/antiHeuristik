@@ -19,8 +19,8 @@ Build a system where users type natural language questions and get SQL queries, 
 - Result presentation (when to chart, when to table, when to summarize)
 - Prompt engineering for structured output (SQL is unforgiving)
 
-## Interview Translation
-You BUILT this. This is the "walk me through a project" answer that goes 5 levels deep. Every question they ask, you have an answer from real experience.
+## The Real Lesson
+NL2SQL looks simple in demos and breaks in every non-trivial case. Ambiguity, safety, error recovery, complex joins — the gap between "it works on happy path" and "someone can trust this with real data" is where all the learning lives.
 
 ## Stretch
 - Add query caching (same question, same result without re-running)

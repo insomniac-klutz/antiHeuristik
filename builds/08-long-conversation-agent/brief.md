@@ -21,8 +21,8 @@ Build a conversational agent that maintains coherent context across 50+ turn con
 - Constitutional AI patterns — use self-critique to keep the agent consistent and safe over long sessions
 - Retrieval beats stuffing — empirical proof from your own benchmarks
 
-## Interview Translation
-"How do you handle long conversations / context limits?" — every production chatbot faces this. Most people say "just use a bigger context window." You'll know why that's wrong and have three alternatives benchmarked.
+## The Real Lesson
+Every production chatbot hits context limits. "Just use a bigger window" is the answer people give when they haven't built one. Three memory strategies benchmarked against each other is how you learn what actually works — and what breaks at scale.
 
 ## Stretch
 - Add persistent memory across sessions ("remember me next time")

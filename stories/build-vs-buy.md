@@ -1,6 +1,6 @@
 # Build vs Buy
 
-Framework for answering "Why not just use [vendor]?" in interviews.
+Framework for thinking through "Why not just use [vendor]?" — the decision every production team faces.
 
 ## The Decision Matrix
 | Factor | Build | Buy |

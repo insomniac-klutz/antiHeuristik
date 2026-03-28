@@ -19,8 +19,8 @@ Build a voice agent: user speaks, system understands, takes action, speaks back.
 - Audio preprocessing and VAD (voice activity detection)
 - End-to-end latency profiling
 
-## Interview Translation
-Voice AI is the hottest Applied AI product category in 2026. Even if the job isn't voice-specific, showing you can architect a real-time multi-model pipeline is a power move.
+## The Real Lesson
+Real-time multi-model pipelines force you to think about latency, streaming, and failure in ways text-only systems never will. The constraints are physical — speed of sound, human patience — and they teach you system design under pressure.
 
 ## Stretch
 - Add emotion detection (frustrated caller → escalate)

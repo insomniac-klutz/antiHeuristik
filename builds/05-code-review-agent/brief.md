@@ -18,8 +18,8 @@ Build an agent that reads pull requests, identifies issues (bugs, style, securit
 - Precision/recall tradeoffs in classification
 - Tool use (git operations, file reading, linting)
 
-## Interview Translation
-"You've built code review tooling — go deeper." This build gives you a whiteboard-ready architecture for that conversation.
+## The Real Lesson
+Precision vs recall in LLM systems is abstract until you build a tool that people actually keep turned on. This build forces you to optimize for trust, not just correctness.
 
 ## Stretch
 - Add auto-fix capability (generate the corrected code)

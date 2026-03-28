@@ -15,12 +15,12 @@ Build the same system three times: a research assistant that searches a doc corp
 - LlamaIndex — index types, query engines, data connectors, when data-framework-first wins
 - CrewAI / AutoGen patterns — review while building, even if not implemented
 - Rolling your own — minimal orchestration, when frameworks hurt more than help
-- The interview answer: "why did you / didn't you use LangChain?"
+- Knowing the real tradeoffs: "why did you / didn't you use LangChain?"
 - Vendor lock-in and abstraction layers — how framework choice constrains provider switching
 - Type hints and typed interfaces — framework comparison requires clean typed abstractions
 
-## Interview Translation
-"What orchestration framework do you use and why?" — every team has an opinion. Having built with all three and being able to articulate tradeoffs from experience is the power answer.
+## The Real Lesson
+Most people pick a framework based on a blog post and never question it. Building the same thing three ways gives you real opinions backed by real numbers — the kind of clarity that normally takes years of switching between teams and stacks.
 
 ## Stretch
 - Add a CrewAI or AutoGen multi-agent variant as a 4th implementation

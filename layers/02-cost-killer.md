@@ -38,8 +38,8 @@ The MVP costs $X/day to run. Cut inference cost by 70% without degrading quality
 - Tracing multi-step agent calls end-to-end
 - Drift detection: is the system degrading over time?
 
-## Interview Translation
-"This pipeline costs $50K/month. The CEO wants it under $15K. What do you do?" — this is THE question for production AI roles. Theory people fumble here. You won't.
+## The Real Lesson
+Every production AI system hits a cost wall. "This pipeline costs $50K/month — get it under $15K." You can't learn this from theory. You learn it by cutting cost on a real system while watching the quality metrics.
 
 ## Stretch
 - Build a model router that classifies query difficulty and routes accordingly
