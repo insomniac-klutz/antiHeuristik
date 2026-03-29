@@ -31,5 +31,17 @@ With GQA + Q4 quantization, the K vectors in cache are derived from quantized we
 ## Compound Effect of Optimizations
 GQA (trades precision) + Flash Attention (free) + Q4 quantization (trades precision) = quality degrades faster than any single technique would suggest. The "effective context window" under all three may be ~40-50% of the advertised maximum. Nobody benchmarks the compound effect — they benchmark each optimization in isolation and assume linear composition. They don't compose linearly.
 
+## Static Pre-Allocation vs Dynamic KV Cache Growth
+
+LMStudio pre-allocates the full KV cache at model load time based on the `context_length` parameter. A 9B Q4 model loaded with 262K context consumed ~11.4GB of 11.94GB VRAM — the model weights are 6.55GB, and the remaining ~5GB was pre-allocated KV cache for 262K tokens. Reducing to 64K dropped usage significantly.
+
+This is the **static allocation** pattern: reserve the worst-case memory budget upfront, guarantee no mid-run failures. The alternative is **dynamic allocation** where KV cache grows per-token — smaller footprint on short conversations but risks OOM at turn 45 of 48 (losing the entire run).
+
+The trade-off maps directly to real-time systems engineering (avionics, medical devices) where `malloc` at runtime is banned. The reasoning is identical: if you allocate dynamically, you must prove the system can't exceed its budget under any input — which is equivalent to computing the worst case anyway. Static allocation makes the worst case the *only* case.
+
+For benchmarking, static is strictly better: a crash partway through a run wastes more than the extra VRAM would. For production chat (variable-length conversations), dynamic allocation with a hard cap and graceful degradation is more practical — vLLM's PagedAttention takes this approach.
+
+**Practical rule**: set `context_length` to the actual maximum you'll need, not the model's advertised maximum. Our paths max out around 50-60K tokens, so 64K covers all paths with headroom while saving ~4GB of VRAM vs 128K.
+
 ## PagedAttention
 Used in vLLM. Extends Flash Attention's idea to the KV cache itself — applies virtual memory paging concepts to GPU memory for dynamic context lengths. Relevant for production serving but not for single-session LMStudio testing.
