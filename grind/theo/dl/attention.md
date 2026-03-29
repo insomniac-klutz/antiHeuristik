@@ -24,8 +24,110 @@ Stores K and V vectors for every past token so they don't need recomputation. At
 
 With GQA + Q4 quantization, the K vectors in cache are derived from quantized weights (already slightly wrong). Errors accumulate as cache grows — they don't cancel out because quantization systematically reduces the dynamic range of attention scores (peaks get lower, valleys get higher).
 
+### Static Pre-Allocation vs Dynamic KV Cache Growth
+LMStudio pre-allocates the full KV cache at model load time based on the `context_length` parameter. A 9B Q4 model loaded with 262K context consumed ~11.4GB of 11.94GB VRAM — the model weights are 6.55GB, and the remaining ~5GB was pre-allocated KV cache for 262K tokens. Reducing to 64K dropped usage significantly.
+
+This is the **static allocation** pattern: reserve the worst-case memory budget upfront, guarantee no mid-run failures. The alternative is **dynamic allocation** where KV cache grows per-token — smaller footprint on short conversations but risks OOM at turn 45 of 48 (losing the entire run).
+
+The trade-off maps directly to real-time systems engineering (avionics, medical devices) where `malloc` at runtime is banned. The reasoning is identical: if you allocate dynamically, you must prove the system can't exceed its budget under any input — which is equivalent to computing the worst case anyway. Static allocation makes the worst case the *only* case.
+
+For benchmarking, static is strictly better: a crash partway through a run wastes more than the extra VRAM would. For production chat (variable-length conversations), dynamic allocation with a hard cap and graceful degradation is more practical — vLLM's PagedAttention takes this approach.
+
+**Practical rule**: set `context_length` to the actual maximum you'll need, not the model's advertised maximum.
+
 ### PagedAttention
 Used in vLLM. Extends Flash Attention's idea to the KV cache itself — applies virtual memory paging concepts to GPU memory for dynamic context lengths. Relevant for production serving but not for single-session testing.
+
+## Architecture Comparison
+
+### Attention Architecture
+
+Three different attention patterns, three different predictions:
+
+**Qwen — GQA (full global)**
+Every layer, every token attends to every other token. Shared K/V heads reduce memory but every layer has global reach. Degradation should be gradual and uniform across fact positions — the softmax dilution curve.
+
+**Gemma — Sliding Window 5:1**
+5 local layers (1024 token window) per 1 global layer. Creates a **recency bias at the architecture level**:
+- Recent facts: visible to all 6 layers (local + global)
+- Distant facts: visible to only 1/6 layers (global only)
+
+Prediction: steeper recall drop-off for distant facts, flatter for recent. The curve shape should be visibly different from Qwen's.
+
+**Phi-4 — Full Attention**
+Full attention at every layer, like Qwen's GQA but without the shared K/V heads. At 3.8B params, each layer is smaller than Qwen's — less capacity per attention operation but no architectural bottleneck to distant tokens.
+
+If all three architectures produce the same degradation curve → attention architecture doesn't matter, it's just about total capacity and precision. If they diverge → architecture is a load-bearing variable. That's the finding.
+
+### Capacity vs Precision
+
+The central trade-off for local inference: more parameters at lower precision, or fewer parameters at higher precision, within the same VRAM budget?
+
+| | Qwen 3.5 9B Q4 | Gemma 3 4B Q8 | Phi-4 3.8B Q8 |
+|---|---|---|---|
+| Params | 9B | 4B | 3.8B |
+| Precision | ~1-1.5 digits | ~3 digits | ~3 digits |
+| VRAM | 6.6GB | 4.98GB | 4.08GB |
+
+This is the local-inference version of the bias-variance trade-off:
+- **More params** = more capacity to route attention precisely (lower bias), but Q4 adds noise to every weight (higher variance)
+- **Fewer params** = less routing capacity (higher bias), but Q8 keeps routes cleaner (lower variance)
+
+At short context, capacity dominates — not enough tokens for quantization noise to accumulate. At long context, noise compounds turn-over-turn in the KV cache, and precision might overtake capacity. The crossover point — if it exists — is what this eval measures.
+
+**How to interpret**:
+- If Qwen 9B Q4 degrades faster than Gemma 4B Q8 on distant probes → **precision > capacity** for long-context recall
+- If Qwen holds better → **capacity > precision**, scaling beats quantization quality
+- If they degrade at the same rate but on different fact types → the dimensions are orthogonal
+
+### The Lineup
+
+#### Qwen 3.5 9B — Q4_K_M (~6.6GB)
+**Role**: High-capacity, low-precision baseline.
+
+- 9B params, GQA (grouped query attention), 128K native context
+- Full attention at every layer — every token attends to every other token
+- Q4_K_M quantization reduces weights to ~1-1.5 digits of effective precision
+- Most parameters in the lineup = most representational capacity for routing attention
+- Q4 = lowest precision = most vulnerable to attention score flattening at long context
+
+**Prediction**: Should hold recall longest due to raw capacity, but Q4 noise will compound turn-over-turn in the KV cache. Expect gradual degradation starting around turn 30-40, with the lost-in-the-middle zone (facts at 40-60% depth) failing first.
+
+#### Gemma 3 4B — Q8_0 (4.98GB)
+**Role**: Sliding window architecture + high precision.
+
+- 4B params, sliding window (1024) interleaved with global attention at 5:1 ratio, 128K native
+- Only 1/6 of layers do global attention — the other 5/6 only see the nearest 1024 tokens
+- Q8_0 = ~3x the effective precision of Q4
+- RoPE base frequency 1M (vs 10K in Gemma 2)
+- KV cache overhead <15% vs ~60% for global-only architectures
+
+**Prediction**: Recent facts should be recalled extremely well (all 6 layers see them). Distant facts degrade faster than Qwen because only global layers (1/6) carry that information. The degradation curve should have a different *shape* — steeper drop-off for distant facts, flatter for recent. If we observe this, it's direct evidence that attention architecture shapes the recall curve, not just context length.
+
+#### Phi-4 Mini Instruct — Q8_0 (4.08GB)
+**Role**: Microsoft architecture baseline, control for reasoning ablation.
+
+- 3.8B params, full attention at every layer, 128K native context
+- Phi-4 architecture — distinct from both Qwen's GQA and Gemma's sliding window
+- Trained on synthetic, high-quality data (Microsoft's approach)
+- General-purpose instruction tuning
+- Smallest model in the lineup
+
+**Prediction**: Full attention gives it the best theoretical reach to distant facts per-layer, but 3.8B params means less capacity to maintain distinct fact representations. Q8 precision helps. Expect a capacity-limited failure pattern — may start confusing facts with each other (merging details) rather than losing them entirely.
+
+#### Phi-4 Mini Reasoning — Q8_0 (4.08GB)
+**Role**: Reasoning-tuned ablation of Phi-4 Mini Instruct.
+
+- Identical architecture, identical quant, identical size
+- Only difference: fine-tuned on synthetic reasoning-dense data with chain-of-thought
+- CoT reasoning generates extra tokens per response that consume context budget
+
+**Prediction**: Two competing effects:
+1. **CoT helps recall** — reasoning forces the model to explicitly re-derive facts from context rather than pattern-matching from memory. This could improve grounding and reduce parametric override.
+2. **CoT hurts context budget** — extra reasoning tokens (200-500 per response) consume ~10-25K tokens across 50 turns. Despite 128K window, effective available context shrinks.
+3. **Domain mismatch** — math-reasoning training may have narrowed attention patterns for structured problems, weakening free-form conversational recall.
+
+The delta between Phi-4 reasoning and Phi-4 instruct isolates the effect of reasoning-specific training on conversational context grounding.
 
 ## Scaling & Degradation
 
@@ -48,6 +150,45 @@ Exact turn numbers shift based on token density per turn. High-density conversat
 
 ### Compound Effect of Optimizations
 GQA (trades precision) + Flash Attention (free) + Q4 quantization (trades precision) = quality degrades faster than any single technique would suggest. The "effective context window" under all three may be ~40-50% of the advertised maximum. Nobody benchmarks the compound effect — they benchmark each optimization in isolation and assume linear composition. They don't compose linearly.
+
+### Predicted Degradation Patterns
+
+Based on architecture and quantization theory:
+
+#### Qwen 3.5 9B Q4
+```
+Turn  1-20:  near-perfect recall, Q4 noise negligible
+Turn 20-40:  subtle hedging on independent facts, schema facts hold
+Turn 40-60:  lost-in-the-middle failures on early-seeded facts
+Turn 60+:    confabulation appears, fact merging, coherence decay
+```
+Shape: gradual linear degradation, worst in the 40-60% depth zone.
+
+#### Gemma 3 4B Q8
+```
+Turn  1-20:  strong recall, Q8 precision keeps scores sharp
+Turn 20-40:  distant facts start failing (only 1/6 layers see them)
+Turn 30-50:  recent facts still strong, distant facts weak — bifurcated curve
+Turn 50+:    capacity limits may cause fact merging across both distances
+```
+Shape: bifurcated — steep for distant, flat for recent. Different curve shape from Qwen.
+
+#### Phi-4 Mini Instruct Q8
+```
+Turn  1-20:  good recall, full attention + Q8 helps
+Turn 20-40:  capacity limits surface — fact merging (confusing details between facts)
+Turn 40+:    smaller capacity degrades faster than Qwen but cleaner than Gemma on distant facts
+```
+Shape: uniform degradation, earlier onset than Qwen but without Gemma's bifurcation.
+
+#### Phi-4 Mini Reasoning Q8
+```
+Turn  1-20:  possibly better recall than instruct (CoT re-derives facts)
+Turn 20-40:  CoT context overhead starts competing with conversation history
+Turn 30-50:  context pressure from reasoning chains may cause earlier degradation
+Turn 50+:    if CoT helped, it should show as better precision on remaining facts even as total recall drops
+```
+Shape: depends on which hypothesis holds — could mirror instruct (shifted left by CoT overhead) or outperform it (reasoning improves per-token recall).
 
 ## Quantization
 
