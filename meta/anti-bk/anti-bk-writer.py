@@ -352,7 +352,7 @@ def _build_chapter(chapter_num: int, chapter: Chapter) -> str:
         def _add_ids(m: re.Match[str]) -> str:
             level = len(m.group(1))
             text = m.group(2)
-            return f'<h{level} id="{_anchor(text)}">{text}</h{level}>'
+            return f'<h{level} id="{_anchor(text)}">{text}</h{level}>\n'
         bumped = _HEADING.sub(_add_ids, bumped)
 
         parts.append(bumped)
@@ -438,7 +438,7 @@ body {
     align-items: center;
     justify-content: center;
     text-align: center;
-    min-height: 70vh;
+    min-height: 100vh;
     padding: 25mm 15mm;
     page-break-after: always;
 }
@@ -534,6 +534,11 @@ h4 {
     border-left: 5px solid var(--accent);
     border-radius: 0 4px 4px 0;
     page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+h4 + *, h5 + *, h6 + * {
+    page-break-before: avoid;
 }
 
 /* ═══ CONCEPT HEADINGS (H5) ════════════════ */
@@ -583,23 +588,26 @@ blockquote {
 
 h3 + p > em:only-child {
     display: block;
-    font-size: 10pt;
+    font-size: 9pt;
     color: var(--fg-light);
     margin: -1mm 0 4mm 0;
     padding: 0 0 2mm 0;
     border-bottom: 1px solid var(--border-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ═══ LISTS ════════════════════════════════ */
 
 ul {
     margin: 3mm 0 5mm 0;
-    padding-left: 0;
+    padding-left: 8mm;
     list-style: none;
 }
 
 ul > li {
-    margin-bottom: 2.5mm;
+    margin-bottom: 0.5mm;
     padding-left: 5mm;
     position: relative;
 }
@@ -628,7 +636,7 @@ ol {
     padding-left: 7mm;
 }
 
-li { margin-bottom: 2.5mm; }
+li { margin-bottom: 0.5mm; }
 
 li > ul, li > ol {
     margin-top: 1.5mm;
@@ -638,6 +646,31 @@ li > ul, li > ol {
 li > strong:first-child {
     color: var(--accent);
     font-size: 10.5pt;
+}
+
+/* ═══ TABLES ═══════════════════════════════ */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    margin: 4mm 0;
+    page-break-inside: avoid;
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+th, td {
+    border: 1px solid var(--bg-code-border);
+    padding: 2mm 3mm;
+    text-align: left;
+    overflow-wrap: break-word;
+}
+
+th {
+    background: var(--accent-bg);
+    font-weight: 600;
+    color: var(--accent-dark);
 }
 
 /* ═══ CODE ═════════════════════════════════ */
@@ -650,6 +683,7 @@ code {
     padding: 0.3mm 2mm;
     border-radius: 3px;
     color: var(--accent);
+    white-space: nowrap;
 }
 
 pre {
@@ -860,8 +894,6 @@ nav.chapter-toc a:hover { color: var(--accent-light); }
 
 /* ═══ PRINT ════════════════════════════════ */
 
-@page { size: A4 portrait !important; }
-
 @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body { font-size: 10.5pt; max-width: 210mm; }
@@ -889,7 +921,7 @@ HTML_TEMPLATE = """\
 
 def md_to_html(md_text: str) -> str:
     """Convert markdown text to HTML body via markdown-it."""
-    md = MarkdownIt("commonmark", {"typographer": True, "html": True})
+    md = MarkdownIt("default", {"typographer": True, "html": True})
     return md.render(md_text)
 
 
@@ -915,6 +947,8 @@ def html_to_pdf(html_path: Path, output: Path) -> None:
         page.pdf(
             path=str(output),
             format="A4",
+            landscape=False,
+            prefer_css_page_size=False,
             margin={"top": "20mm", "right": "18mm", "bottom": "22mm", "left": "18mm"},
             print_background=True,
             display_header_footer=True,
@@ -932,9 +966,13 @@ def html_to_pdf(html_path: Path, output: Path) -> None:
 def add_pdf_bookmarks(pdf_path: Path, chapters: list[Chapter]) -> None:
     """Add a clickable bookmark outline to the PDF using pypdf."""
     from pypdf import PdfReader, PdfWriter
+    from pypdf.generic import Fit
 
     reader = PdfReader(pdf_path)
     writer = PdfWriter(clone_from=reader)
+
+    # /FitH keeps portrait orientation — /Fit can trigger landscape in some viewers
+    top_fit = Fit.fit_horizontally(top=None)
 
     def _find_page(text: str) -> int:
         """Find the first page containing *text*."""
@@ -949,17 +987,21 @@ def add_pdf_bookmarks(pdf_path: Path, chapters: list[Chapter]) -> None:
     ):
         ch_title = f"{chapter_num}. {chapter.title}"
         ch_page = _find_page(ch_title)
-        ch_bookmark = writer.add_outline_item(ch_title, ch_page)
+        ch_bookmark = writer.add_outline_item(ch_title, ch_page, fit=top_fit)
 
         for i, section in enumerate(chapter.sections, start=1):
             sec_title = f"{chapter_num}.{i}. {section.name}"
             sec_page = _find_page(sec_title)
-            sec_bookmark = writer.add_outline_item(sec_title, sec_page, parent=ch_bookmark)
+            sec_bookmark = writer.add_outline_item(
+                sec_title, sec_page, parent=ch_bookmark, fit=top_fit
+            )
 
             for h in section.headings:
                 if h.level == 2:
                     h_page = _find_page(h.text)
-                    writer.add_outline_item(h.text, h_page, parent=sec_bookmark)
+                    writer.add_outline_item(
+                        h.text, h_page, parent=sec_bookmark, fit=top_fit
+                    )
 
     with open(pdf_path, "wb") as f:
         writer.write(f)

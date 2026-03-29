@@ -140,6 +140,10 @@ PATTERNS: tuple[MarkdownPattern, ...] = (
     MarkdownPattern.inline("nested_bullet", Category.LIST,      r"^\s{2,}- ",                            "Nested bullet (indented ≥2 spaces)"),
     MarkdownPattern.inline("bold_def",      Category.LIST,      r"^\s*- \*\*[^*]+\*\*:\s+",             "Bold-colon definition (- **term**: desc)"),
 
+    # ── tables ─────────────────────────────────────────────────────
+    MarkdownPattern.inline("table_row",     Category.BLOCK,     r"^\|.+\|$",                             "Table row (| col | col |)"),
+    MarkdownPattern.inline("table_sep",     Category.BLOCK,     r"^\|[-:|]+\|$",                         "Table separator row (|---|---|)"),
+
     # ── blocks ─────────────────────────────────────────────────────
     MarkdownPattern.inline("blockquote",    Category.BLOCK,     r"^>\s+",                                "Blockquote (> text)"),
     MarkdownPattern.inline("notes_block",   Category.BLOCK,     r"^>\s*notes:",                          "Notes blockquote (> notes: ...)"),
