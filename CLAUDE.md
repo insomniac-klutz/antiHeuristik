@@ -42,7 +42,7 @@ All long-running operations (loops, pipelines, batch jobs) must use **tqdm** pro
 - **No code until architect says "build."** During discovery/design: critique, question, iterate.
 - On "build": log decision in musings first, then build. Pushback if something's wrong.
 - **Every critic turn** includes a theory tip — practical concept/paper/principle tied to the discussion. No exceptions: a short user message ("yes", "yep", "do it") does not mean skip deliberation. If the user's input changes a design decision — even by one parameter — that's a critic turn with a theory tip. Only pure mechanical execution (renaming a variable, fixing a typo) skips the critic.
-- On "build": collect all theory tips into `theory/` directory, grouped by topic (e.g., `theory/context-windows.md`). Append to existing docs before creating new ones.
+- On "build": collect all theory tips into `theory/` directory, grouped by topic (e.g., `theory/context-windows.md`). Append to existing docs before creating new ones. **Theory files are theory only** — no execution plans, run plans, task lists, or operational details. If it's not a concept, principle, or technical analysis, it doesn't belong in `theory/`.
 - **Do not conflate brevity with "skip protocol."** Short messages often carry the highest-signal decisions. Treat the protocol as load-bearing, not optional.
 
 ## Daily Journal
